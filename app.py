@@ -139,11 +139,7 @@ def extract_text_from_csv(uploaded_file) -> str:
 # 4. SIDEBAR: COMMAND CIPHER TERMINAL (UPGRADED LOCAL STORAGE)
 # ------------------------------------------------------------------------------
 # Initialize the local browser storage manager
-@st.cache_resource
-def get_cookie_manager():
-    return stx.CookieManager()
-
-cookie_manager = get_cookie_manager()
+cookie_manager = stx.CookieManager(key="bleed_cookie_manager")
 
 with st.sidebar:
     st.title("⚡ COMMAND CIPHER")
