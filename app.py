@@ -287,12 +287,42 @@ if execute_audit:
                 st.info(f"**BRIEFING SUMMARY:** {audit_data.get('briefing_summary', 'N/A')}")
                 
                 # Dataframe Display for Breaches
+                # Dataframe Display, Charts, and Export for Breaches
                 violations = audit_data.get("violations_found", [])
                 if violations:
+                    st.markdown("---")
                     st.subheader("Identified SLA Breaches")
-                    st.dataframe(violations, use_container_width=True)
+                    
+                    # Convert AI JSON array into a Pandas DataFrame for advanced manipulation
+                    df_violations = pd.DataFrame(violations)
+                    
+                    # 1. Render Interactive Data Table
+                    st.dataframe(df_violations, use_container_width=True)
+                    
+                    # 2. Render Cyberpunk Bar Chart (Penalties grouped by Clause)
+                    st.subheader("Capital Leakage by Clause")
+                    chart_data = df_violations.groupby("clause_ref")["penalty_recovered"].sum().reset_index()
+                    st.bar_chart(
+                        data=chart_data, 
+                        x="clause_ref", 
+                        y="penalty_recovered",
+                        color="#00F2FE", # Cyberpunk Cyan
+                        use_container_width=True
+                    )
+                    
+                    # 3. Generate Downloadable CSV Report
+                    csv_export = df_violations.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 DOWNLOAD FORENSIC REPORT (.CSV)",
+                        data=csv_export,
+                        file_name=f"BLEED_Protocol_Audit_{datetime.datetime.now().strftime('%Y%m%d')}.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
                 else:
                     st.success("No SLA breaches or capital leakage identified from the provided documents.")
+
+
 
             except json.JSONDecodeError:
                 st.error("FAILED TO PARSE RESPONSE: Model did not return valid JSON structure.")
