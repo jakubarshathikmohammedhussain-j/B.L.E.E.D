@@ -274,7 +274,7 @@ if execute_audit:
                 st.markdown("### AUDIT FORENSIC FINDINGS")
                 
                 # Metric display
-                leakage_amount = audit_data.get("total_leakage", 0.0)
+                leakage_amount = sum(item.get("penalty_recovered", 0.0) for item in audit_data.get("violations_found", []))
                 currency_code = audit_data.get("currency", "USD")
                 
                 st.markdown(
