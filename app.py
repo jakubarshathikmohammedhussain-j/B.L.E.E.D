@@ -12,12 +12,15 @@ from pydantic import BaseModel, Field
 # ------------------------------------------------------------------------------
 # 1. PAGE CONFIGURATION & CYBERPUNK THEME (CSS)
 # ------------------------------------------------------------------------------
+import streamlit as st
+
 st.set_page_config(
-    page_title="B.L.E.E.D. PROTOCOL",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    page_title="B.L.E.E.D. Protocol",
+    page_icon="https://raw.githubusercontent.com/jakubarshathikmohammedhussain-j/B.L.E.E.D/main/mock_data/1786476130407.png",
+    layout="centered",
+    initial_sidebar_state="expanded"
 )
+
 
 st.markdown(
     """
