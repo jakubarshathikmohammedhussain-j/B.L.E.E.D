@@ -238,7 +238,7 @@ if execute_audit:
                 # Initialize Google GenAI Client
                 client = genai.Client(api_key=user_api_key)
                 
-                                system_instruction = (
+                system_instruction = (
                     "You are an aggressive Corporate Forensic Auditor searching for missed vendor penalty monies. "
                     "Analyze the provided contract SLA clauses against the system logs. "
                     "STRICT RULES:\n"
