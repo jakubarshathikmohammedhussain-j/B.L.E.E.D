@@ -3,6 +3,8 @@ import json
 import pandas as pd
 import pypdf
 import streamlit as st
+import datetime
+import extra_streamlit_components as stx
 from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
@@ -134,18 +136,42 @@ def extract_text_from_csv(uploaded_file) -> str:
         return f"[CSV EXTRACTION ERROR: {str(e)}]"
 
 # ------------------------------------------------------------------------------
-# 4. SIDEBAR: COMMAND CIPHER TERMINAL
+# 4. SIDEBAR: COMMAND CIPHER TERMINAL (UPGRADED LOCAL STORAGE)
 # ------------------------------------------------------------------------------
+# Initialize the local browser storage manager
+@st.cache_resource(experimental_allow_widgets=True)
+def get_cookie_manager():
+    return stx.CookieManager()
+
+cookie_manager = get_cookie_manager()
+
 with st.sidebar:
     st.title("⚡ COMMAND CIPHER")
     
-    env_api_key = os.environ.get("GEMINI_API_KEY", "")
+    # 1. Fetch the key from the user's local browser cookie (if it exists)
+    saved_key = cookie_manager.get("bleed_api_key")
+    if saved_key is None:
+        saved_key = ""
+    
     user_api_key = st.text_input(
         "GEMINI API KEY",
-        value=env_api_key,
+        value=saved_key,
         type="password",
-        help="Provide your Gemini API key.",
+        help="Your key is processed securely and never saved to our servers.",
     )
+    
+    # 2. Local Storage Checkbox
+    remember_me = st.checkbox("Save Key Locally (30 Days)", value=bool(saved_key))
+    
+    # 3. Execution Logic: Write or Delete the cookie based on user action
+    if remember_me and user_api_key and user_api_key != saved_key:
+        cookie_manager.set(
+            "bleed_api_key", 
+            user_api_key, 
+            expires_at=datetime.datetime.now() + datetime.timedelta(days=30)
+        )
+    elif not remember_me and saved_key:
+        cookie_manager.delete("bleed_api_key")
     
     st.info(
         "**OPERATIONAL DIRECTIVE:**\n"
@@ -163,7 +189,7 @@ with st.sidebar:
         """, 
         unsafe_allow_html=True
     )
-
+    
 # ------------------------------------------------------------------------------
 # 5. MAIN WORKSPACE: FILE UPLOADERS & MISSION BRIEFING
 # ------------------------------------------------------------------------------
