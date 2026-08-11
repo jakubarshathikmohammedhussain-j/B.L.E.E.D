@@ -1,0 +1,6 @@
+timestamp,event_type,duration_minutes,description,root_cause
+2026-10-12 14:00:00,CRITICAL_OUTAGE,210,Production database server offline. Sales dashboard unreachable.,Vendor network hardware failure
+2026-10-15 09:00:00,INFO,15,High traffic login queue processing normally.,Normal user operations
+2026-10-18 02:00:00,UNANNOUNCED_MAINTENANCE,75,Vendor performed undocumented system patching.,Vendor internal maintenance
+2026-10-22 11:30:00,WARNING,5,API response latency spiked above 2000ms.,Cloud routing delay
+
