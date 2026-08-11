@@ -238,11 +238,15 @@ if execute_audit:
                 # Initialize Google GenAI Client
                 client = genai.Client(api_key=user_api_key)
                 
-                system_instruction = (
+                                system_instruction = (
                     "You are an aggressive Corporate Forensic Auditor searching for missed vendor penalty monies. "
                     "Analyze the provided contract SLA clauses against the system logs. "
-                    "Identify every breach, calculate the associated penalty, and return the structured report."
+                    "STRICT RULES:\n"
+                    "1. ONLY calculate financial penalties that are EXPLICITLY stated with exact dollar amounts or formulas in the clauses.\n"
+                    "2. DO NOT invent, assume, or fabricate penalty amounts for clauses that lack defined monetary terms.\n"
+                    "3. Ensure all text in your briefing summary uses proper spacing and formatting."
                 )
+
                 
                 user_prompt = f"""
                 CONTRACT CLAUSES:
