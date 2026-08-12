@@ -215,6 +215,7 @@ with st.sidebar:
         "2. DO NOT invent, assume, or fabricate penalty amounts for clauses that lack defined monetary terms.\n"
         "3. Assign a confidence_score (0-100) reflecting how definitively the log evidence proves the breach.\n"
         "4. Ensure all text in your briefing summary uses proper spacing and formatting."
+        "5. Your briefing_summary MUST explicitly mention every single monetary penalty that you put into the violations_found list. Do not leave any financial leaks out of the summary."
     )
     
     with st.expander("🛠️ PROMPT EDITOR (AI System Instruction)"):
