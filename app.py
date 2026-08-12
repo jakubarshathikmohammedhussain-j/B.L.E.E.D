@@ -109,7 +109,8 @@ class BreachItem(BaseModel):
     incident_date: str = Field(description="Date or log marker of the breach event.")
     breach_details: str = Field(description="Summary of how the SLA was breached.")
     penalty_recovered: float = Field(description="Calculated financial credit or penalty owed.")
-
+    confidence_score: int = Field(description="Confidence percentage from 0 to 100 based on certainty of breach match.")
+    
 class AuditReport(BaseModel):
     total_leakage: float = Field(description="Total sum of financial penalties identified.")
     currency: str = Field(description="Currency code, e.g., USD.")
@@ -130,13 +131,27 @@ def extract_text_from_pdf(uploaded_file) -> str:
     except Exception as e:
         return f"[PDF EXTRACTION ERROR: {str(e)}]"
 
-def extract_text_from_csv(uploaded_file) -> str:
-    """Reads a Streamlit uploaded CSV file and converts the dataframe to string."""
-    try:
-        df = pd.read_csv(uploaded_file)
-        return df.to_string(index=False)
-    except Exception as e:
-        return f"[CSV EXTRACTION ERROR: {str(e)}]"
+def extract_text_from_csvs(uploaded_files) -> str:
+    """Parses multiple CSV files, merges them, sorts by timestamp if available, and converts to a unified CSV string."""
+    dfs = []
+    for file in uploaded_files:
+        try:
+            df = pd.read_csv(file)
+            dfs.append(df)
+        except Exception as e:
+            st.error(f"Error parsing CSV '{file.name}': {e}")
+    
+    if dfs:
+        # Merge all uploaded log files into a single DataFrame
+        combined_df = pd.concat(dfs, ignore_index=True)
+        
+        # Sort chronologically if a 'timestamp' column exists
+        if "timestamp" in combined_df.columns:
+            combined_df["timestamp"] = pd.to_datetime(combined_df["timestamp"], errors="ignore")
+            combined_df = combined_df.sort_values(by="timestamp")
+            
+        return combined_df.to_csv(index=False)
+    return ""
 
 # ------------------------------------------------------------------------------
 # 4. SIDEBAR: COMMAND CIPHER TERMINAL (UPGRADED LOCAL STORAGE)
@@ -171,7 +186,26 @@ with st.sidebar:
         )
     elif not remember_me and saved_key:
         cookie_manager.delete("bleed_api_key")
+        
+        # Interactive Prompt Editor Accordion
+    DEFAULT_SYSTEM_INSTRUCTION = (
+        "You are an aggressive Corporate Forensic Auditor searching for missed vendor penalty monies. "
+        "Analyze the provided contract SLA clauses against the system logs.\n"
+        "STRICT RULES:\n"
+        "1. ONLY calculate financial penalties that are EXPLICITLY stated with exact dollar amounts or formulas in the clauses.\n"
+        "2. DO NOT invent, assume, or fabricate penalty amounts for clauses that lack defined monetary terms.\n"
+        "3. Assign a confidence_score (0-100) reflecting how definitively the log evidence proves the breach.\n"
+        "4. Ensure all text in your briefing summary uses proper spacing and formatting."
+    )
     
+    with st.expander("🛠️ PROMPT EDITOR (AI System Instruction)"):
+        system_instruction = st.text_area(
+            "Tweak Auditing Instructions:",
+            value=DEFAULT_SYSTEM_INSTRUCTION,
+            height=200,
+            help="Modify the system rules sent to Gemini to calibrate auditing strictness."
+        )
+        
     st.info(
         "**OPERATIONAL DIRECTIVE:**\n"
         "Upload master contracts (PDF) and system logs (CSV). "
@@ -217,13 +251,14 @@ with col1:
         with st.expander("PREVIEW EXTRACTED CONTRACT TEXT"):
             st.text(sla_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
 
-with col2:
-    log_file = st.file_uploader("UPLOAD SYSTEM LOGS (.CSV)", type=["csv"])
-    log_text = ""
-    if log_file is not None:
-        log_text = extract_text_from_csv(log_file)
-        with st.expander("PREVIEW EXTRACTED LOG DATA"):
-            st.text(log_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
+    with col2:
+        log_files = st.file_uploader("UPLOAD SYSTEM LOGS (.CSV)", type=["csv"], accept_multiple_files=True)
+        log_text = ""
+        if log_files:
+            log_text = extract_text_from_csvs(log_files)
+            with st.expander(f"PREVIEW MERGED LOG DATA ({len(log_files)} file(s) loaded)"):
+                st.text(log_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
+
 
 execute_audit = st.button("EXECUTE FORENSIC REVENUE AUDIT", use_container_width=True)
 
@@ -233,7 +268,7 @@ execute_audit = st.button("EXECUTE FORENSIC REVENUE AUDIT", use_container_width=
 if execute_audit:
     if not user_api_key:
         st.error("ACCESS DENIED: Missing Gemini API Key. Provide a valid key in the sidebar.")
-    elif not sla_text or not log_text:
+    elif not sla_text or not log_files:
         st.warning("INPUT ERROR: You must upload BOTH a PDF contract and CSV log file to run the audit.")
     else:
         with st.spinner("ANALYZING EXTRACTED DOCUMENTS USING GEMINI 3.5 FLASH-LITE..."):
@@ -241,15 +276,6 @@ if execute_audit:
                 # Initialize Google GenAI Client
                 client = genai.Client(api_key=user_api_key)
                 
-                system_instruction = (
-                    "You are an aggressive Corporate Forensic Auditor searching for missed vendor penalty monies. "
-                    "Analyze the provided contract SLA clauses against the system logs. "
-                    "STRICT RULES:\n"
-                    "1. ONLY calculate financial penalties that are EXPLICITLY stated with exact dollar amounts or formulas in the clauses.\n"
-                    "2. DO NOT invent, assume, or fabricate penalty amounts for clauses that lack defined monetary terms.\n"
-                    "3. Ensure all text in your briefing summary uses proper spacing and formatting."
-                )
-
                 
                 user_prompt = f"""
                 CONTRACT CLAUSES:
@@ -302,7 +328,15 @@ if execute_audit:
                     
                     # Convert AI JSON array into a Pandas DataFrame for advanced manipulation
                     df_violations = pd.DataFrame(violations)
-                    
+                
+                  # NEW V4.0 UI FORMATTING: Confidence Score & Column Order
+                if "confidence_score" in df_violations.columns:
+                    df_violations["confidence_score"] = df_violations["confidence_score"].apply(lambda x: f"{x}%")
+                
+                columns_order = ["clause_ref", "incident_date", "confidence_score", "penalty_recovered", "breach_details"]
+                existing_cols = [col for col in columns_order if col in df_violations.columns]
+                df_violations = df_violations[existing_cols]
+                
                     # 1. Render Interactive Data Table
                     st.dataframe(df_violations, use_container_width=True)
                     
