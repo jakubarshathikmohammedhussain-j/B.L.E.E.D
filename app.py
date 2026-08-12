@@ -189,6 +189,9 @@ with st.sidebar:
     elif not remember_me and saved_key:
         cookie_manager.delete("bleed_api_key")
         
+    st.markdown("---")
+    st.title("⚙️ ENGINE TUNING")
+    
         # Interactive Prompt Editor Accordion
     DEFAULT_SYSTEM_INSTRUCTION = (
         "You are an aggressive Corporate Forensic Auditor searching for missed vendor penalty monies. "
