@@ -331,7 +331,7 @@ if execute_audit:
                 
                     # NEW V4.0 UI FORMATTING: Confidence Score & Column Order
                     if "confidence_score" in df_violations.columns:
-                    df_violations["confidence_score"] = df_violations["confidence_score"].apply(lambda x: f"{x}%")
+                        df_violations["confidence_score"] = df_violations["confidence_score"].apply(lambda x: f"{x}%")
                 
                     columns_order = ["clause_ref", "incident_date", "confidence_score", "penalty_recovered", "breach_details"]
                     existing_cols = [col for col in columns_order if col in df_violations.columns]
