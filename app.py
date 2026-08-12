@@ -120,6 +120,22 @@ class AuditReport(BaseModel):
 # ------------------------------------------------------------------------------
 # 3. HELPER FUNCTIONS: FILE EXTRACTION
 # ------------------------------------------------------------------------------
+def play_voice_briefing(text):
+    """Uses the browser's native Web Speech API to read the audit summary out loud."""
+    # Clean the text so JavaScript doesn't break on quotes or newlines
+    clean_text = text.replace('"', '\\"').replace('\n', ' ')
+    js = f"""
+    <script>
+        var msg = new SpeechSynthesisUtterance("{clean_text}");
+        msg.rate = 0.95;
+        msg.pitch = 0.8;
+        msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
+    </script>
+    """
+    st.components.v1.html(js, height=0)
+    
+
 def extract_text_from_pdfs(uploaded_files) -> str:
     """Reads multiple Streamlit uploaded PDF files, extracts, and merges text from all pages."""
     all_text = []
@@ -247,7 +263,43 @@ with st.expander("⚙️ ENGINE TUNING: AI Prompt Editor"):
         height=180,
         help="Modify the system rules sent to Gemini to calibrate auditing strictness."
     )
-    
+
+# 🎬 CINEMATIC VFX INJECTION
+st.markdown(
+    """
+    <style>
+    /* 1. App Boot Sequence (Smooth Fade In) */
+    @keyframes boot-up {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .stApp {
+        animation: boot-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* 2. Neon Core Pulse (Mission Box Breathing) */
+    @keyframes neon-pulse {
+        0% { box-shadow: 0 0 5px #00F2FE, inset 0 0 2px #00F2FE; }
+        50% { box-shadow: 0 0 20px #00F2FE, inset 0 0 8px #00F2FE; }
+        100% { box-shadow: 0 0 5px #00F2FE, inset 0 0 2px #00F2FE; }
+    }
+    .mission-box {
+        animation: neon-pulse 3s infinite alternate !important;
+    }
+
+    /* 3. Hologram Terminal Flicker (Critical Alert Title) */
+    @keyframes text-flicker {
+        0%, 19.9%, 22%, 62.9%, 64%, 64.9%, 70%, 100% { opacity: 1; text-shadow: 0 0 10px #00F2FE; }
+        20%, 21.9%, 63%, 63.9%, 65%, 69.9% { opacity: 0.4; text-shadow: none; }
+    }
+    .mission-title {
+        animation: text-flicker 5s linear infinite !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 st.markdown(
     """
@@ -339,9 +391,11 @@ if execute_audit:
                     """,
                     unsafe_allow_html=True,
                 )
-                
-                # Summary Callout
-                st.info(f"**BRIEFING SUMMARY:** {audit_data.get('briefing_summary', 'N/A')}")
+                    # Summary Callout & Voice Protocol Trigger
+                    briefing_text = audit_data.get('briefing_summary', 'N/A')
+                    st.info(f"**BRIEFING SUMMARY:** {briefing_text}")
+                    play_voice_briefing(briefing_text)
+
                 
                 # Dataframe Display for Breaches
                 # Dataframe Display, Charts, and Export for Breaches
