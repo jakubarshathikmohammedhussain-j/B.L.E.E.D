@@ -120,16 +120,20 @@ class AuditReport(BaseModel):
 # ------------------------------------------------------------------------------
 # 3. HELPER FUNCTIONS: FILE EXTRACTION
 # ------------------------------------------------------------------------------
-def extract_text_from_pdf(uploaded_file) -> str:
-    """Reads a Streamlit uploaded PDF file and extracts text from all pages."""
-    try:
-        reader = pypdf.PdfReader(uploaded_file)
-        text_content = []
-        for page in reader.pages:
-            text_content.append(page.extract_text())
-        return "\n".join(text_content)
-    except Exception as e:
-        return f"[PDF EXTRACTION ERROR: {str(e)}]"
+def extract_text_from_pdfs(uploaded_files) -> str:
+    """Reads multiple Streamlit uploaded PDF files, extracts, and merges text from all pages."""
+    all_text = []
+    for file in uploaded_files:
+        try:
+            reader = pypdf.PdfReader(file)
+            text_content = []
+            for page in reader.pages:
+                text_content.append(page.extract_text())
+            all_text.append(f"--- DOCUMENT: {file.name} ---\n" + "\n".join(text_content))
+        except Exception as e:
+            st.error(f"PDF EXTRACTION ERROR ({file.name}): {str(e)}")
+    return "\n\n".join(all_text)
+
 
 def extract_text_from_csvs(uploaded_files) -> str:
     """Parses multiple CSV files, merges them, and safely converts to a unified string."""
@@ -241,13 +245,13 @@ st.markdown(
 col1, col2 = st.columns(2)
 
 # File Upload Widgets
-with col1:
-    sla_file = st.file_uploader("UPLOAD MASTER CONTRACT (.PDF)", type=["pdf"])
-    sla_text = ""
-    if sla_file is not None:
-        sla_text = extract_text_from_pdf(sla_file)
-        with st.expander("PREVIEW EXTRACTED CONTRACT TEXT"):
-            st.text(sla_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
+    with col1:
+        sla_files = st.file_uploader("UPLOAD MASTER CONTRACTS (.PDF)", type=["pdf"], accept_multiple_files=True)
+        sla_text = ""
+        if sla_files:
+            sla_text = extract_text_from_pdfs(sla_files)
+            with st.expander(f"PREVIEW EXTRACTED CONTRACT TEXT ({len(sla_files)} file(s) loaded)"):
+                st.text(sla_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
 
     with col2:
         log_files = st.file_uploader("UPLOAD SYSTEM LOGS (.CSV)", type=["csv"], accept_multiple_files=True)
@@ -266,7 +270,7 @@ execute_audit = st.button("EXECUTE FORENSIC REVENUE AUDIT", use_container_width=
 if execute_audit:
     if not user_api_key:
         st.error("ACCESS DENIED: Missing Gemini API Key. Provide a valid key in the sidebar.")
-    elif not sla_text or not log_files:
+    elif not sla_files or not log_files:
         st.warning("INPUT ERROR: You must upload BOTH a PDF contract and CSV log file to run the audit.")
     else:
         with st.spinner("ANALYZING EXTRACTED DOCUMENTS USING GEMINI 3.5 FLASH-LITE..."):
