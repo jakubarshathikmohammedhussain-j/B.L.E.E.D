@@ -329,13 +329,13 @@ if execute_audit:
                     # Convert AI JSON array into a Pandas DataFrame for advanced manipulation
                     df_violations = pd.DataFrame(violations)
                 
-                  # NEW V4.0 UI FORMATTING: Confidence Score & Column Order
-                if "confidence_score" in df_violations.columns:
+                    # NEW V4.0 UI FORMATTING: Confidence Score & Column Order
+                    if "confidence_score" in df_violations.columns:
                     df_violations["confidence_score"] = df_violations["confidence_score"].apply(lambda x: f"{x}%")
                 
-                columns_order = ["clause_ref", "incident_date", "confidence_score", "penalty_recovered", "breach_details"]
-                existing_cols = [col for col in columns_order if col in df_violations.columns]
-                df_violations = df_violations[existing_cols]
+                    columns_order = ["clause_ref", "incident_date", "confidence_score", "penalty_recovered", "breach_details"]
+                    existing_cols = [col for col in columns_order if col in df_violations.columns]
+                    df_violations = df_violations[existing_cols]
                 
                     # 1. Render Interactive Data Table
                     st.dataframe(df_violations, use_container_width=True)
