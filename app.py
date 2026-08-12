@@ -245,22 +245,22 @@ st.markdown(
 col1, col2 = st.columns(2)
 
 # File Upload Widgets
-    with col1:
-        sla_files = st.file_uploader("UPLOAD MASTER CONTRACTS (.PDF)", type=["pdf"], accept_multiple_files=True)
-        sla_text = ""
-        if sla_files:
-            sla_text = extract_text_from_pdfs(sla_files)
-            with st.expander(f"PREVIEW EXTRACTED CONTRACT TEXT ({len(sla_files)} file(s) loaded)"):
-                st.text(sla_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
+with col1:
+    sla_files = st.file_uploader("UPLOAD MASTER CONTRACTS (.PDF)", type=["pdf"], accept_multiple_files=True)
+    sla_text = ""
+    if sla_files:
+        sla_text = extract_text_from_pdfs(sla_files)
+        with st.expander(f"PREVIEW EXTRACTED CONTRACT TEXT ({len(sla_files)} file(s) loaded)"):
+            st.text(sla_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
 
-
-    with col2:
-        log_files = st.file_uploader("UPLOAD SYSTEM LOGS (.CSV)", type=["csv"], accept_multiple_files=True)
-        log_text = ""
-        if log_files:
-            log_text = extract_text_from_csvs(log_files)
-            with st.expander(f"PREVIEW MERGED LOG DATA ({len(log_files)} file(s) loaded)"):
-                st.text(log_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
+with col2:
+    log_files = st.file_uploader("UPLOAD SYSTEM LOGS (.CSV)", type=["csv"], accept_multiple_files=True)
+    log_text = ""
+    if log_files:
+        log_text = extract_text_from_csvs(log_files)
+        with st.expander(f"PREVIEW MERGED LOG DATA ({len(log_files)} file(s) loaded)"):
+            st.text(log_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
+            
 
 
 execute_audit = st.button("EXECUTE FORENSIC REVENUE AUDIT", use_container_width=True)
