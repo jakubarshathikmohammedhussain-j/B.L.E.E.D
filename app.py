@@ -253,6 +253,7 @@ col1, col2 = st.columns(2)
             with st.expander(f"PREVIEW EXTRACTED CONTRACT TEXT ({len(sla_files)} file(s) loaded)"):
                 st.text(sla_text[:1000] + "\n\n...[TRUNCATED FOR PREVIEW]...")
 
+
     with col2:
         log_files = st.file_uploader("UPLOAD SYSTEM LOGS (.CSV)", type=["csv"], accept_multiple_files=True)
         log_text = ""
