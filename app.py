@@ -132,7 +132,7 @@ def extract_text_from_pdf(uploaded_file) -> str:
         return f"[PDF EXTRACTION ERROR: {str(e)}]"
 
 def extract_text_from_csvs(uploaded_files) -> str:
-    """Parses multiple CSV files, merges them, sorts by timestamp if available, and converts to a unified CSV string."""
+    """Parses multiple CSV files, merges them, and safely converts to a unified string."""
     dfs = []
     for file in uploaded_files:
         try:
@@ -145,13 +145,11 @@ def extract_text_from_csvs(uploaded_files) -> str:
         # Merge all uploaded log files into a single DataFrame
         combined_df = pd.concat(dfs, ignore_index=True)
         
-        # Sort chronologically if a 'timestamp' column exists
-        if "timestamp" in combined_df.columns:
-            combined_df["timestamp"] = pd.to_datetime(combined_df["timestamp"], errors="ignore")
-            combined_df = combined_df.sort_values(by="timestamp")
-            
+        # We removed the strict Pandas datetime sorting to prevent crash errors.
+        # Gemini 3.5 Flash is smart enough to read the timeline naturally!
         return combined_df.to_csv(index=False)
     return ""
+
 
 # ------------------------------------------------------------------------------
 # 4. SIDEBAR: COMMAND CIPHER TERMINAL (UPGRADED LOCAL STORAGE)
