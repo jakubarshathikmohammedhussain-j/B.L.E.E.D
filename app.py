@@ -392,10 +392,19 @@ if execute_audit:
                     """,
                     unsafe_allow_html=True,
                 )
-                # Summary Callout & Voice Protocol Trigger (Plain text wrapper to prevent font glitches)
+                # Summary Callout & Voice Protocol Trigger (Custom HTML Container)
                 briefing_text = audit_data.get('briefing_summary', 'N/A')
-                st.markdown(f"> **BRIEFING SUMMARY:**\n> {briefing_text}")
+                st.markdown(
+                   f"""
+                   <div style="background-color: #1e293b; border-left: 4px solid #00F2FE; padding: 16px; border-radius: 4px; margin-bottom: 20px;">
+                       <strong style="color: #00F2FE; display: block; margin-bottom: 8px;">BRIEFING SUMMARY:</strong>
+                       <span style="color: #e2e8f0; font-family: monospace; font-size: 14px; line-height: 1.5;">{briefing_text}</span>
+                  </div>
+                   """,
+                   unsafe_allow_html=True
+                )
                 play_voice_briefing(briefing_text)
+
 
 
                 
