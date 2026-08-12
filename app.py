@@ -391,10 +391,10 @@ if execute_audit:
                     """,
                     unsafe_allow_html=True,
                 )
-                    # Summary Callout & Voice Protocol Trigger
-                    briefing_text = audit_data.get('briefing_summary', 'N/A')
-                    st.info(f"**BRIEFING SUMMARY:** {briefing_text}")
-                    play_voice_briefing(briefing_text)
+                # Summary Callout & Voice Protocol Trigger
+                briefing_text = audit_data.get('briefing_summary', 'N/A')
+                st.info(f"**BRIEFING SUMMARY:** {briefing_text}")
+                play_voice_briefing(briefing_text)
 
                 
                 # Dataframe Display for Breaches
