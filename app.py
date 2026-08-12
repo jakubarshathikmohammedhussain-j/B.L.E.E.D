@@ -189,8 +189,6 @@ with st.sidebar:
     elif not remember_me and saved_key:
         cookie_manager.delete("bleed_api_key")
         
-    st.markdown("---")
-    st.title("⚙️ ENGINE TUNING")
     
         # Interactive Prompt Editor Accordion
     DEFAULT_SYSTEM_INSTRUCTION = (
@@ -231,6 +229,26 @@ with st.sidebar:
 # ------------------------------------------------------------------------------
 # 5. MAIN WORKSPACE: FILE UPLOADERS & MISSION BRIEFING
 # ------------------------------------------------------------------------------
+# ⚙️ Interactive Prompt Editor (Moved to Top Main Screen)
+DEFAULT_SYSTEM_INSTRUCTION = (
+    "You are an aggressive Corporate Forensic Auditor searching for missed vendor penalty monies. "
+    "Analyze the provided contract SLA clauses against the system logs.\n"
+    "STRICT RULES:\n"
+    "1. ONLY calculate financial penalties that are EXPLICITLY stated with exact dollar amounts or formulas in the clauses.\n"
+    "2. DO NOT invent, assume, or fabricate penalty amounts for clauses that lack defined monetary terms.\n"
+    "3. Assign a confidence_score (0-100) reflecting how definitively the log evidence proves the breach.\n"
+    "4. Ensure all text in your briefing summary uses proper spacing and formatting."
+)
+
+with st.expander("⚙️ ENGINE TUNING: AI Prompt Editor"):
+    system_instruction = st.text_area(
+        "Tweak Auditing Instructions:",
+        value=DEFAULT_SYSTEM_INSTRUCTION,
+        height=180,
+        help="Modify the system rules sent to Gemini to calibrate auditing strictness."
+    )
+    
+
 st.markdown(
     """
     <div class="mission-box">
